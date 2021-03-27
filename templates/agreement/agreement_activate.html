@@ -1,4 +1,6 @@
 {% extends 'agreement/basefile.html' %}
+
+{% load humanize %}
 {% block content %}
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
 
@@ -16,7 +18,7 @@
               <div class="col-sm-12 col-md-12">
 
                 <!-- <a href="{%url 'agreement_input_view' %}"  style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add New Agreement</a> -->
-                <a href="{%url 'rent_input_view_new' id=agreement.id %}" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Create New Rent Rule</a>
+                <!-- <a href="{%url 'rent_input_view_new' id=agreement.id %}" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Create New Rent Rule</a> -->
                 <!-- <a href="/rents/{{ agreement.id }}/" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Rent List</a> -->
                 <!-- <a href="{%url 'security_input_view'   %}"  style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add New Security line</a> -->
                 <!-- <a href="/securities/{{ agreement.id }}/" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Security Line List</a> -->
@@ -34,14 +36,31 @@
 
 
                 <!-- <h1>Agreement Id: {{ agreement.from_line_date }}</h1> -->
-                <h1>Agreement Id: {{ agreement.id }}</h1>
+                <h1>Agreement Id: {{ agreement.agrm_id }}</h1>
 
 
-                <p><strong>Agreement Create Date:</strong> {{ agreement.agreement_date }}</p>
-                <p><strong>Agreement Expiry Date:</strong> {{ agreement.expiry_date }}</p>
-                <p><strong>Contact Person</strong> {{ agreement.employee_name}}</p>
-                <p><strong>Notice Date</strong> {{ agreement.notice_date}}</p>
-                <p><strong>Shop Name</strong> {{ agreement.main_site}}</p>
+                <p><strong>Agreement Creation Date:</strong> {{ agreement.agreement_date}}</p>
+                <p><strong>Agreement Effective Date:</strong> {{ agreement.effected_date_as_actual}}</p>
+                <p><strong>Agreement Expiry Date:</strong> {{ agreement.expiry_date}}</p>
+                <!-- <p><strong>Contact Person</strong> {{ agreement.employee_name}}</p> -->
+                <p><strong>Renewal Notification: </strong> {{ agreement.notice_date}}</p>
+                <p><strong>Shop Name:</strong> {{ agreement.main_site}}</p>
+
+
+                <p><strong>Site type:</strong> {{ site_type}}</p>
+                <p><strong>Property Size:</strong> {{ property_size}}</p>
+                <!-- <p><strong>Main Site</strong> {{ agreement.main_site}}</p> -->
+                <p><strong>Owner1:</strong> {{ owner1}}</p>
+                <p><strong>Owner2:</strong> {{ owner2}}</p>
+                <p><strong>Owner3:</strong> {{ owner3}}</p>
+                <p><strong>Owner4:</strong> {{ owner4}}</p>
+                <p><strong>Owner5:</strong> {{ owner5}}</p>
+                <p><strong>Sis Supplier Code:</strong> {{ sis_supplier_code}}</p>
+                <p><strong>Area:</strong> {{area}}</p>
+                <p><strong>District:</strong> {{district}}</p>
+                <p><strong>Divison:</strong> {{division}}</p>
+
+                <p id="total"><strong>Total ROU</strong> {{ agreement.total_rou|stringformat:".0f"|intcomma}}</p>
 
                 <p id="total_tag"><strong>Total ROU</strong> {{ rent_rou }}</p>
                 <p id="status"><strong>Status</strong> {{agreement.status}}</p>
@@ -68,17 +87,24 @@
                     {% for rent in rent %}
                     <tr>
                       <td>{{ rent.rent_rule_no }}</td>
-                      {% if '1899-12-30' in rent.start_period %}
+
+                      {% if rent.start_period|date:'M , Y' == 'Dec , 1899'  %}
+                      <td>0</td>
 
                       {% else %}
-                      <td>{{ rent.start_period }}</td>
+                      <td>{{ rent.start_period|date:'M , Y' }}</td>
                       {% endif %}
 
+                      {% if rent.end_period|date:'M , Y' == 'Dec , 1899'  %}
+                      <td>0</td>
 
-
-                      <td>{{ rent.end_period}}</td>
-                      <td>{{ rent.rent_per_month }}</td>
-                      <td>{{ rent.advance_agreement_per_month }}</td>
+                      {% else %}
+                      <td>{{ rent.end_period|date:'M , Y' }}</td>
+                      {% endif %}
+                      <!-- <td>{{ rent.start_period|date:'M , Y' }}</td> -->
+                      <!-- <td>{{ rent.end_period|date:'M , Y'}}</td> -->
+                      <td>{{ rent.rent_per_month|stringformat:".0f"|intcomma }}</td>
+                      <td>{{ rent.advance_agreement_per_month |stringformat:".0f"|intcomma}}</td>
                       <td><a href="/rent_delete_view/{{ rent.id }}/">Delete</a></td>
 
                     </tr>
@@ -99,16 +125,47 @@
 
 
 
+
             <div class="row">
 
               <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Activate</a> -->
 
-              {% if 'activated' in agreement.status %}
+              {% if 'Approved' in agreement.status  %}
               <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">B</a> -->
-
+              {% elif 'Saved' in agreement.status %}
               {% else %}
 
                 <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Activate</a>
+              {% endif %}
+              <!-- <div class="col-sm-12 col-md-5">
+                <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div>
+              </div> -->
+              <!-- <div class="col-sm-12 col-md-7">
+                <div class="dataTables_paginate paging_simple_numbers" id="example2_paginate">
+                  <ul class="pagination">
+                    <li class="paginate_button page-item previous disabled" id="example2_previous"><a href="#" aria-controls="example2" data-dt-idx="0" tabindex="0" class="page-link">Previous</a></li>
+                    <li class="paginate_button page-item active"><a href="#" aria-controls="example2" data-dt-idx="1" tabindex="0" class="page-link">1</a></li>
+                    <li class="paginate_button page-item "><a href="#" aria-controls="example2" data-dt-idx="2" tabindex="0" class="page-link">2</a></li>
+                    <li class="paginate_button page-item "><a href="#" aria-controls="example2" data-dt-idx="3" tabindex="0" class="page-link">3</a></li>
+                    <li class="paginate_button page-item "><a href="#" aria-controls="example2" data-dt-idx="4" tabindex="0" class="page-link">4</a></li>
+                    <li class="paginate_button page-item "><a href="#" aria-controls="example2" data-dt-idx="5" tabindex="0" class="page-link">5</a></li>
+                    <li class="paginate_button page-item "><a href="#" aria-controls="example2" data-dt-idx="6" tabindex="0" class="page-link">6</a></li>
+                    <li class="paginate_button page-item next" id="example2_next"><a href="#" aria-controls="example2" data-dt-idx="7" tabindex="0" class="page-link">Next</a></li>
+                  </ul>
+                </div>
+              </div> -->
+            </div>
+            <div class="row">
+
+              <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Activate</a> -->
+
+              {% if 'Approved' in agreement.status   %}
+              <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">B</a> -->
+              {% elif  'Saved' in agreement.status %}
+
+              {% else %}
+
+                <a id="reject_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Reject</a>
               {% endif %}
               <!-- <div class="col-sm-12 col-md-5">
                 <div class="dataTables_info" id="example2_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div>
@@ -158,7 +215,7 @@
 
   document.getElementById("activate_button").addEventListener("click", vanish, false);
 
-
+  document.getElementById("reject_button").addEventListener("click", vanish_now, false);
   // $.ajaxSetup({
   //   headers: { "X-CSRFToken": '{{csrf_token}}' }
   // });
@@ -180,6 +237,39 @@
         console.log(json); // log the returned json to the console
         console.log("success"); // another sanity check
         window.location.reload(true);
+        // $('#activate_button').hide();
+        // $('#reject_button').hide();
+      },
+
+      // handle a non-successful response
+      error: function(xhr, errmsg, err) {
+
+        // console.log(err);
+        // $('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+        //     " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+        console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+      }
+    });
+
+  }
+  function vanish_now() {
+    var table = $('#example2  td:last').hide();
+    $('#total_tag').show();
+    $('#status').show();
+    request_url = '/update_agreement_status_new_saved_view/' + {{agreement.id}} + '/';
+    $.ajax({
+      url: request_url, // the endpoint
+      type: "POST", // http method
+      data: '', // data sent with the post request
+
+      // handle a successful response
+      success: function(json) {
+        // $('#post-text').val(''); //x remove the value from the input
+        console.log(json); // log the returned json to the console
+        console.log("success"); // another sanity check
+        window.location.reload(true);
+        // $('#activate_button').hide();
+        // $('#reject_button').hide();
       },
 
       // handle a non-successful response

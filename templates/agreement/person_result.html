@@ -49,8 +49,13 @@
                       <!-- <td>{{ person.hasbankinfo }}</td> -->
                       <td>{{ person.address }}</td>
                       <td>{{ person.sis_supplier_code }}</td>
-
+                      {% if person.editable or request.user.groups.all.0.name == 'Reviewer' %}
+                        <td>Not editable</td>
+                      {% else %}
                       <td><a href="/person_edit_view/{{ person.id }}/" >Edit</a></td>
+                      {% endif %}
+
+
                       <!-- <td>{{ agreement.contact_person}}</td>
                       <td>{{ agreement.notice_period}}</td> -->
                     </tr>

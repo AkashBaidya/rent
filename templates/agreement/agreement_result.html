@@ -55,7 +55,14 @@
                       <td>{{ agreement.main_site}}</td>
                       <td>{{ agreement.status}}</td>
                       <td><a href="/agreement/{{ agreement.id }}/" >Details</a></td>
-                      <td><a href="/agreement_edit/{{ agreement.id }}/" >Edit</a></td>
+
+                      {% if agreement.editable or request.user.groups.all.0.name == 'Reviewer' %}
+                        <td>Not editable</td>
+                      {% else %}
+                        <td><a href="/agreement_edit/{{ agreement.id }}/" >Edit</a></td>
+                      {% endif %}
+
+
                       <!-- <td></td> -->
                       <!-- <td>Edit</td> -->
                     </tr>

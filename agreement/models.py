@@ -21,6 +21,7 @@ class Site(models.Model):
     site_size = models.IntegerField(max_length=100,help_text='size of the site in sft', null=True)
     district = models.CharField(max_length=20)
     area = models.CharField(max_length=20)
+    editable=models.IntegerField(default=0)
     site_type=models.CharField(max_length=20,choices=[
         ('SHOP', 'SHOP'),
         ('WAREHOUSE', 'WAREHOUSE'),
@@ -93,6 +94,7 @@ class Person(models.Model):
     village=models.CharField(max_length=40)
     entry_by=models.CharField(max_length=20,blank=True)
     entry_date = models.DateField(null=True)
+    editable=models.IntegerField(default=0)
 
 
 
@@ -158,6 +160,7 @@ class Properties(models.Model):
 
     entry_by=models.CharField(max_length=20,blank=True)
     entry_date = models.DateField(null=True)
+    editable=models.IntegerField(default=0)
 
     def __str__(self):
         return self.division+' '+self.district+' '+self.thana+' '+self.village
@@ -222,12 +225,13 @@ class Agreement(models.Model):
     employee_designation=models.CharField(max_length=50,blank=True)
     employee_phone_number=models.CharField(max_length=15,blank=True)
     employee_email=models.EmailField(max_length=30,blank=True)
-    status=models.CharField(max_length=10,blank=True)
+    status=models.CharField(max_length=10,blank=True,default="Saved")
     interest_rate=models.DecimalField(null=True,max_digits=30,decimal_places=4)
     properties=models.ForeignKey(Properties,on_delete=models.CASCADE,blank=True)
 
     entry_by=models.CharField(max_length=20,blank=True)
     entry_date = models.DateField(null=True)
+    editable=models.IntegerField(default=0)
 
 
     def save(self,*args, **kwargs):

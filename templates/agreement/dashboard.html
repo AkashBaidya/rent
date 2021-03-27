@@ -270,17 +270,17 @@ to get the desired effect
                 </p>
               </a>
             </li>
-            {% if user.username == 'admin' %}
-              <li class="nav-item">
-                <a href="{%url 'agreement_activated_view'%} " class="nav-link">
-                  <i class="nav-icon fas fa-chart-bar"></i>
-                  <p>
-                    List of Submitted agreements
-                    <span class="right badge badge-danger"></span>
-                  </p>
-                </a>
-              </li>
-            {% else %}
+            {% if request.user.groups.all.0.name == 'Reviewer' or request.user.groups.all.0.name == 'Admin' %}
+            <li class="nav-item">
+              <a href="{%url 'agreement_activated_view'%} " class="nav-link">
+                <i class="nav-icon fas fa-chart-bar"></i>
+                <p>
+                  List of Submitted agreements
+                  <span class="right badge badge-danger"></span>
+                </p>
+              </a>
+            </li>
+
             {% endif %}
             <li class="nav-item">
               <a href="{%url 'logout'%} " class="nav-link">

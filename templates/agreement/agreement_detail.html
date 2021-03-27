@@ -16,9 +16,20 @@
           <div id="example2_wrapper" class="dataTables_wrapper dt-bootstrap4">
             <div class="row">
               <div class="col-sm-12 col-md-12">
+                {% if 'Submitted' in agreement.status %}
+                <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">B</a> -->
+                {% elif 'Approved' in agreement.status %}
 
+                {% elif request.user.groups.all.0.name == 'Reviewer' %}
+
+
+                {% else %}
+
+                  <a href="{%url 'rent_input_view_new' id=agreement.id %}" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Create New Rent Rule</a>
+                {% endif %}
                 <!-- <a href="{%url 'agreement_input_view' %}"  style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add New Agreement</a> -->
-                <a href="{%url 'rent_input_view_new' id=agreement.id %}" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Create New Rent Rule</a>
+
+
                 <!-- <a href="/rents/{{ agreement.id }}/" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Rent List</a> -->
                 <!-- <a href="{%url 'security_input_view'   %}"  style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Add New Security line</a> -->
                 <!-- <a href="/securities/{{ agreement.id }}/" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Security Line List</a> -->
@@ -41,7 +52,7 @@
 
                 <p><strong>Agreement Creation Date:</strong> {{ agreement.agreement_date}}</p>
                 <p><strong>Agreement Effective Date:</strong> {{ agreement.effected_date_as_actual}}</p>
-                <p><strong>Agreement Expiry Date:</strong> {{ agreement.expiry_date}}</p>
+                <p><strong>Agreement Expiry Date:</strong> {{ agreement.expiry_date|date:'M , Y'}}</p>
                 <!-- <p><strong>Contact Person</strong> {{ agreement.employee_name}}</p> -->
                 <p><strong>Renewal Notification: </strong> {{ agreement.notice_date}}</p>
                 <p><strong>Shop Name:</strong> {{ agreement.main_site}}</p>
@@ -129,9 +140,12 @@
 
               <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Activate</a> -->
 
-              {% if 'submitted' in agreement.status %}
+              {% if 'Submitted' in agreement.status %}
               <!-- <a id="activate_button" style="margin: 10px" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">B</a> -->
-              {% elif 'activated' in agreement.status %}
+              {% elif 'Approved' in agreement.status %}
+
+              {% elif request.user.groups.all.0.name == 'Reviewer' %}
+
 
               {% else %}
 

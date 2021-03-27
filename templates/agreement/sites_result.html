@@ -44,11 +44,20 @@
                       <td>{{ sites.site_extension}}</td>
                       <td>{{ sites.area}}</td>
                       <td>{{ sites.district}}</td>
-                      <!-- <td>{{ sites.branch_manager }}</td> -->
-                      <!-- <td>{{ sites.exp_date }}</td> -->
                       <td>{{ sites.site_type}}</td>
                       <td>{{ sites.entry_date}}</td>
-                      <td><a href="/sites_edit_view/{{ sites.id }}/" >Edit</a></td>
+                      <!-- <td>{{ sites.branch_manager }}</td> -->
+                      <!-- <td>{{ sites.exp_date }}</td> -->
+
+
+                      {% if sites.editable or request.user.groups.all.0.name == 'Reviewer' %}
+                        <td>Not editable</td>
+                      {% else %}
+                        <td><a href="/sites_edit_view/{{ sites.id }}/" >Edit</a></td>
+                      {% endif %}
+
+
+
                     </tr>
                     {% endfor %}
                   </tbody>

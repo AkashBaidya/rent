@@ -283,7 +283,8 @@ to get the desired effect
               </p>
             </a>
           </li>
-          {% if user.username == 'admin' %}
+
+          {% if request.user.groups.all.0.name == 'Reviewer' or request.user.groups.all.0.name == 'Admin' %}
           <li class="nav-item">
             <a href="{%url 'agreement_activated_view'%} " class="nav-link">
               <i class="nav-icon fas fa-chart-bar"></i>
@@ -293,7 +294,7 @@ to get the desired effect
               </p>
             </a>
           </li>
-          {% else %}
+          <!-- {% else %} -->
           <!-- <li class="nav-item">
             <a href="{%url 'agreement_activated_view'%} " class="nav-link">
               <i class="nav-icon fas fa-chart-bar"></i>

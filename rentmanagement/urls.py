@@ -63,6 +63,7 @@ from rentmanagement.views import agreement_activated_view
 
 from rentmanagement.views import update_agreement_status_view
 from rentmanagement.views import update_agreement_status_new_view
+from rentmanagement.views import update_agreement_status_new_saved_view
 
 from rentmanagement.views import autocomplete_div_view
 from rentmanagement.views import autocomplete_postcode_view
@@ -85,6 +86,7 @@ urlpatterns = [
     path('sites/',sites_view,name='sites_view'),
     path('update_agr_status/<id>/',update_agreement_status_view,name='update_agreement_status_view'),
     path('update_agr_status_new/<id>/',update_agreement_status_new_view,name='update_agreement_status_new_view'),
+    path('update_agreement_status_new_saved_view/<id>/',update_agreement_status_new_saved_view,name='update_agreement_status_new_saved_view'),
     path('person_input/',person_input_view,name='person_input_view'),
     path('person/',person_view,name='person_view'),
     path('error/',error_view,name='error_view'),

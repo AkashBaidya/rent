@@ -61,7 +61,13 @@
                       <td>{{ property.district }}</td>
                       <td>{{ property.status }}</td>
 
+                      {% if property.editable or request.user.groups.all.0.name == 'Reviewer' %}
+                        <td>Not editable</td>
+                      {% else %}
                       <td><a href="/property_edit_view/{{ property.id }}/" >Edit</a></td>
+                      {% endif %}
+
+
                       <!-- <td>{{ sites.exp_date }}</td> -->
 
                     </tr>

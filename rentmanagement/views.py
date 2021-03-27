@@ -69,6 +69,7 @@ def sites_input_view(request):
         if instance.site_type=='STORE':
             instance.site_extension=check_maximum_extension(request.POST['site_code'])
         else:
+            instance.site_extension=0
             print("Hello")
 
         # print("print "+request.user)
@@ -571,6 +572,7 @@ def agreement_input_view(request):
 @login_required
 def sites_view(request):
     all_sites = Site.objects.all()
+    find_in_agreement('sites')
     return render(request, 'agreement/sites_result.html', {'all_sites': all_sites})
 
 
@@ -623,6 +625,8 @@ def advance_detail_view(request,ag):
 @login_required
 def agreement_view(request):
     all_agreement = Agreement.objects.all()
+    find_in_agreement('agreements')
+    # update_all_agreement()
     return render(request, 'agreement/agreement_result.html', {'all_agreement': all_agreement})
 
 @login_required
@@ -678,7 +682,29 @@ def agreement_detail_view_activate(request,pk):
     # agreement = get_object_or_404(Agreement,id=pk)
     agreement=Agreement.objects.prefetch_related('rentline').get(id=pk)
 
+
     e = Agreement.objects.get(id=pk)
+
+    e.total_rou=rent_rou
+    e.save()
+
+
+    site_type=e.main_site.site_type
+    property_size=e.properties.property_size
+    owner1=e.properties.owner1
+    owner2=e.properties.owner2
+    owner3=e.properties.owner3
+    owner4=e.properties.owner4
+    owner5=e.properties.owner5
+
+
+    sis_supplier_code=owner1.sis_supplier_code
+    area=e.main_site.area
+    print('area'+area)
+    district=e.main_site.district
+
+    division=e.properties.division
+
     rent=e.rentline.all()
     security=e.securityline.all()
     advance=e.advanceline.all()
@@ -688,7 +714,12 @@ def agreement_detail_view_activate(request,pk):
     # print(advance)
     # users = User.objects.get(id=pk).prefetch_related('item_set')
     # agreement=agreement.rent
-    return render(request, 'agreement/agreement_activate.html', context={'agreement': agreement, 'rent':rent,'security':security, 'advance':advance,'rent_rou':rent_rou})
+    # print(agreement)
+    # print(rent)
+    # print(advance)
+    # users = User.objects.get(id=pk).prefetch_related('item_set')
+    # agreement=agreement.rent
+    return render(request, 'agreement/agreement_activate.html', context={'agreement': agreement, 'rent':rent,'security':security, 'advance':advance,'rent_rou':rent_rou,'site_type':site_type,'property_size':property_size,'owner1':owner1,'owner2':owner2,'owner3':owner3,'owner4':owner4,'owner5':owner5,'sis_supplier_code':sis_supplier_code,'area':area,'division':division,'district':district})
 
 
 @login_required
@@ -710,10 +741,12 @@ def agreement_detail_view_agrm(request,pk):
 @login_required
 def properties_view(request):
     all_properties = Properties.objects.all()
+    find_in_agreement('properties')
     return render(request, 'agreement/property_results.html', {'all_properties': all_properties})
 @login_required
 def person_view(request):
     all_person = Person.objects.all()
+    find_in_agreement('persons')
     return render(request, 'agreement/person_result.html', {'all_person': all_person})
     # if request.method == 'POST':
     #     form = SiteForm(request.POST)
@@ -770,6 +803,7 @@ def total_rou_calculation(pk):
     # print(e.agreement_advance_amount)
     #
     total_rou=total_pv+int(e.agreement_advance_amount)
+    print("ROU")
     print(total_rou)
 
 
@@ -829,7 +863,7 @@ def update_agreement_status_view(request, id):
     # fetch the object related to passed id
     obj = get_object_or_404(Agreement, id = id)
 
-    obj.status='submitted'
+    obj.status='Submitted'
     obj.save()
     print(obj.status)
 
@@ -848,8 +882,43 @@ def update_agreement_status_new_view(request, id):
     #
     # fetch the object related to passed id
     obj = get_object_or_404(Agreement, id = id)
+    obj.editable=1
+    obj.main_site.editable=1
+    obj.main_site.save()
+    obj.properties.owner1.editable=1
+    obj.properties.owner1.save()
+    obj.properties.editable=1
+    obj.properties.save()
 
-    obj.status='activated'
+    obj.status='Approved'
+    obj.save()
+    print(obj.status)
+
+    return JsonResponse([1, 2, 3, 4], safe=False)
+
+@csrf_exempt
+def update_agreement_status_new_saved_view(request, id):
+    # csrfContext = RequestContext(request)
+    # dictionary for initial data with
+    # field names as keys
+    context ={}
+
+    print(type(id))
+    print(id)
+
+    # id=int(id)
+    #
+    # fetch the object related to passed id
+    obj = get_object_or_404(Agreement, id = id)
+    obj.editable=0
+    obj.main_site.editable=0
+    obj.main_site.save()
+    obj.properties.owner1.editable=0
+    obj.properties.owner1.save()
+    obj.properties.editable=0
+    obj.properties.save()
+
+    obj.status='Saved'
     obj.save()
     print(obj.status)
 
@@ -863,6 +932,7 @@ def check_maximum_extension(shop_code):
         obj=Site.objects.filter(site_code__contains=shop_code)
         a=obj.aggregate(Max('site_extension'))
         return_value=a['site_extension__max']+1
+        print("Maximum value")
         print(return_value)
         return return_value
 
@@ -922,3 +992,46 @@ def create_id_for_agreement(shop_code,file_no,serial_no):
     # context["form"] = form
     #
     # return render(request, "update_view.html", context)
+
+def find_in_agreement(search_value):
+    total_agreement_number=Agreement.objects.all().count()
+    print(total_agreement_number)
+    if search_value=='sites':
+        print("hello")
+        for x in range(total_agreement_number):
+            e = Agreement.objects.get(id=x+1)
+            if e.status=='Submitted':
+                e.main_site.editable=1
+                e.main_site.save()
+    elif search_value=='agreements':
+        for x in range(total_agreement_number):
+            e = Agreement.objects.get(id=x+1)
+            if e.status=='Submitted':
+                e.editable=1
+                e.save()
+    elif search_value=='persons':
+        for x in range(total_agreement_number):
+            e = Agreement.objects.get(id=x+1)
+            if e.status=='Submitted':
+                e.properties.owner1.editable=1
+                e.properties.owner1.save()
+    elif search_value=='properties':
+        for x in range(total_agreement_number):
+            e = Agreement.objects.get(id=x+1)
+            if e.status=='submitted':
+                e.properties.editable=1
+                e.properties.save()
+    else:
+        print('no')
+def update_all_agreement():
+    total_agreement_number=Agreement.objects.all().count()
+    for x in range(total_agreement_number):
+        # e = Agreement.objects.get(id=x+1)
+        rent_rou=total_rou_calculation(x+1)
+        e = Agreement.objects.get(id=x+1)
+        e.total_rou=rent_rou
+        e.save()
+
+
+            # site_type=e.main_site.site_type
+            # filtered_value = agreement.objects.filter( Q(pk = int(customerid)) | Q(customer_name__contains = str(customerid)) | Q(customer_mobile_no__contains = str(customerid)))
