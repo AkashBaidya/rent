@@ -45,7 +45,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 from django.db.models import Max
-
+from django.db.models import Count
 
 
 
@@ -66,11 +66,28 @@ def sites_input_view(request):
         # print(request.POST['site_extension'].value())
         instance=form.save(commit=False)
         instance.site_code=instance.site_code.upper()
-        if instance.site_type=='STORE':
-            instance.site_extension=check_maximum_extension(request.POST['site_code'])
+        # if instance.site_type=='STORE':
+
+
+        if(request.POST['extension']=='no'):
+
+            if check_duplicate(request.POST['site_code'],0)==1:
+                print("no")
+                return render(request,'agreement/error.html', {'msg': 'Duplicate site code with same site extension'})
+
+            else:
+                print('no_other')
+                instance.site_extension=0
+
         else:
-            instance.site_extension=0
-            print("Hello")
+            print('yes')
+            instance.site_extension=check_maximum_extension(request.POST['site_code'])
+
+
+
+        # else:
+        #     instance.site_extension=0
+        #     print("Hello")
 
         # print("print "+request.user)
 
@@ -362,18 +379,29 @@ def rent_input_view(request):
 def rent_input_view_new(request,id):
     form = RentlineForm(request.POST or None)
     not_permitted=1
+    not_permitted_for_advance=1
     e = Agreement.objects.get(id=id)
     total_months=e.total_months
+    total_advance_amount=e.agreement_advance_amount
 
     rent=e.rentline.aggregate(Sum('total_months'))
+    agreement=e.rentline.aggregate(Sum('advance_agreement_per_month'))
 
 
     for item in rent.values():
         a=item
+    for item in agreement.values():
+        b=item
     print(type(a))
+    print(type(b))
     passed=1
     if a is None:
         passed=0
+
+    bypass=1
+
+    if b is None:
+        bypass=0
 
 
     if passed==1:
@@ -381,6 +409,11 @@ def rent_input_view_new(request,id):
             not_permitted=0
             print("Sum of months in agreement" +str(a))
             print("Total months in the agreement"+str(total_months))
+    if bypass==1:
+        if b>total_advance_amount:
+            not_permitted_for_advance=0
+            print("Sum of advance in agreement" +str(b))
+            print("Total advance in the agreement"+str(total_advance_amount))
 
 
         # print("Not permitted value"+str(not_permitted))
@@ -396,7 +429,7 @@ def rent_input_view_new(request,id):
     # print(form.data['agreement_ref'])
     print(form.errors)
     print(form)
-    if not_permitted==1:
+    if not_permitted==1 and not_permitted_for_advance==1:
         if form.is_valid():
             post=form.save(commit=False)
             if a is None:
@@ -407,6 +440,15 @@ def rent_input_view_new(request,id):
                 final=int(form['total_months'].value())+a
                 if final>total_months:
                     return render(request,'agreement/error.html', {'msg': 'Added rent month is bigger'})
+
+            if b is None:
+                final=int(form['advance_agreement_per_month'].value())
+                if final>total_advance_amount:
+                    return render(request,'agreement/error.html', {'msg': 'Added Adjustment Amount is bigger'})
+            else:
+                final=int(form['advance_agreement_per_month'].value())+a
+                if final>total_advance_amount:
+                    return render(request,'agreement/error.html', {'msg': 'Added Adjustment Amount is bigger'})
 
 
             post=form.save()
@@ -429,6 +471,7 @@ def adv_input_view_new(request,id):
 
 
     not_permitted=1
+
     e = Agreement.objects.get(id=id)
     total_amount=e.agreement_advance_amount
     rent=e.advanceline.aggregate(Sum('advance_adjustment_per_month'))
@@ -461,7 +504,7 @@ def adv_input_view_new(request,id):
     # print(form.data['agreement_ref'])
     print(form.errors)
     print(form)
-    if not_permitted==1:
+    if not_permitted==1 and not_permitted_for_advance==1:
         if form.is_valid():
             post=form.save(commit=False)
             if a is None:
@@ -939,6 +982,42 @@ def check_maximum_extension(shop_code):
     except:
         print(None)
         return return_value
+
+
+def check_duplicate(shop_code,site_extension):
+
+    print("Check Duplicate")
+    print(shop_code)
+    return_value=0
+
+
+
+    try:
+        obj=Site.objects.filter(site_code__contains=shop_code)
+        a=obj.aggregate(Count('site_extension'))
+        if(a['site_extension__count']>0):
+            return_value=1
+        else:
+            return_value=0
+        print(a)
+        return return_value
+    # try:
+    #
+    #
+    #     # print("site_extension")
+    #     # print(obj.site_extension)
+    #     # print(obj.site_code)
+    #     # if obj['site_extension']==site_extension:
+    #     #     return_value=1;
+    #     # else:
+    #     #     return_value=0;
+    #     # print("return value")
+    #     # print(return_value)
+    #     # return return_value
+    #
+    except:
+        print("Except")
+        return return_value
         # print("None")
 
 def create_id_for_agreement(shop_code,file_no,serial_no):
@@ -1018,7 +1097,7 @@ def find_in_agreement(search_value):
     elif search_value=='properties':
         for x in range(total_agreement_number):
             e = Agreement.objects.get(id=x+1)
-            if e.status=='submitted':
+            if e.status=='Submitted':
                 e.properties.editable=1
                 e.properties.save()
     else:

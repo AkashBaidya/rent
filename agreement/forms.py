@@ -23,13 +23,14 @@ class SiteForm(forms.ModelForm):
     longitude=forms.DecimalField(widget=forms.HiddenInput)
     # entry_by=forms.CharField(widget=forms.HiddenInput)
     site_size=forms.IntegerField(widget=forms.HiddenInput)
+    extension=forms.CharField(widget=forms.HiddenInput)
     district=forms.CharField(widget=forms.HiddenInput)
     area=forms.CharField(widget=forms.HiddenInput)
     site_type=forms.CharField(widget=forms.HiddenInput)
 
     class Meta:
         model = Site
-        fields = ['site_code','display_area','storage_area_inside','storage_area_outside','lattitude','longitude','site_size','district','area','site_type']
+        fields = ['site_code','display_area','extension','storage_area_inside','storage_area_outside','lattitude','longitude','site_size','district','area','site_type']
 
 
 class SiteEditForm(forms.ModelForm):

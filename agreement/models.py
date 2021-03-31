@@ -11,6 +11,9 @@ from django.utils import timezone
 class Site(models.Model):
     site_code= models.CharField(max_length=4)
     site_extension= models.IntegerField(max_length=20,blank=True,null=True)
+    extension=models.CharField(max_length=4,blank=True,null=True,choices=[
+        ('yes', 'yes'),
+        ('no', 'no')])
     display_area=models.IntegerField(max_length=20,null=True,blank=True,help_text='size of the site in sft',default=0)
     storage_area_inside=models.IntegerField(max_length=20,null=True,blank=True, help_text='size of the site in sft')
     storage_area_outside=models.IntegerField(max_length=20,null=True,blank=True, help_text='size of the site in sft')
